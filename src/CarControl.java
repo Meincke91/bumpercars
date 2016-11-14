@@ -6,6 +6,7 @@
 
 
 import java.awt.Color;
+import java.util.ArrayList;
 
 
 class Grid {
@@ -19,7 +20,6 @@ class Grid {
                 this.grid[i][j] = new Semaphore(1);
             }
         }
-    //this.grid[3][0] = new Semaphore(0);
     }
 
 
@@ -62,6 +62,55 @@ class Gate {
 
 }
 
+class Alley{
+	Semaphore[] alley;
+	//Semaphore g = new Semaphore(1);
+    //Semaphore e = new Semaphore(1);
+    
+
+    public Alley(){
+        this.alley = new Semaphore[9];
+   
+        for(int i = 0; i < 9; i++){
+        	this.alley[i] = new Semaphore(1);
+        }
+    }
+    
+	public void enter(int no) throws InterruptedException {
+		System.out.println(no);
+		/* deadlock somewhere in this check. it is too slow. use some fancy technique from book to fix */
+		if(no == 1 || no == 2 || no == 3 || no == 4){
+			
+			this.alley[5].P();
+			this.alley[6].P();
+			this.alley[7].P();
+			this.alley[8].P();
+			this.alley[5].V();
+			this.alley[6].V();
+			this.alley[7].V();
+			this.alley[8].V();
+		} else {
+			this.alley[1].P();
+			this.alley[2].P();
+			this.alley[3].P();
+			this.alley[4].P();
+			this.alley[1].V();
+			this.alley[2].V();
+			this.alley[3].V();
+			this.alley[4].V();
+		}
+		this.alley[no].P();
+		
+		System.out.println();
+	}
+		
+	public void leave(int no) throws InterruptedException{
+		this.alley[no].V();
+		
+		//System.out.println("no " + no + " : " + this.alley[1].toString() + " " + this.alley[5].toString());
+	}
+}
+
 class Car extends Thread {
 
     int basespeed = 100;             // Rather: degree of slowness
@@ -81,11 +130,13 @@ class Car extends Thread {
     Pos curpos;                      // Current position 
     Pos newpos;                      // New position to go to
     Grid grid;
+    Alley alley;
 
-    public Car(int no, CarDisplayI cd, Gate g, Grid grid) {
+    public Car(int no, CarDisplayI cd, Gate g, Grid grid, Alley alley) {
         this.grid = grid;
         this.no = no;
         this.cd = cd;
+        this.alley = alley;
         mygate = g;
         startpos = cd.getStartPos(no);
         barpos = cd.getBarrierPos(no);  // For later use
@@ -156,8 +207,16 @@ class Car extends Thread {
                     speed = chooseSpeed();
                 }
                 	
-                newpos = nextPos(curpos);
+                if(curpos.equals(new Pos(2,1)) || curpos.equals(new Pos(1,4)) || curpos.equals(new Pos(10,0))){
+                	alley.enter(no);
+                	
+                }
+                if(curpos.equals(new Pos(9,1)) || curpos.equals(new Pos(0,2))){
+                	alley.leave(no);
+                	
+                }
                 
+                newpos = nextPos(curpos);
                 //  Move to new position
                 grid.enter(newpos);
 
@@ -179,6 +238,7 @@ class Car extends Thread {
             e.printStackTrace();
         }
     }
+   
 
 }
 
@@ -187,16 +247,18 @@ public class CarControl implements CarControlI{
     CarDisplayI cd;           // Reference to GUI
     Car[]  car;               // Cars
     Gate[] gate;              // Gates
-    Grid grid;
+    volatile Grid grid;
+    volatile Alley alley;
 
     public CarControl(CarDisplayI cd) {
         this.cd = cd;
         car  = new  Car[9];
         gate = new Gate[9];
         this.grid = new Grid();
+        this.alley = new Alley();
         for (int no = 0; no < 9; no++) {
             gate[no] = new Gate();
-            car[no] = new Car(no,cd,gate[no], grid);
+            car[no] = new Car(no,cd,gate[no], grid, alley);
             car[no].start();
         }
     }
