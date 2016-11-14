@@ -7,6 +7,33 @@
 
 import java.awt.Color;
 
+
+class Grid {
+    Semaphore[][] grid;
+
+    public Grid(){
+        this.grid = new Semaphore[Layout.ROWS][Layout.COLS];
+        //Fill grid
+        for(int i = 0; i < Layout.ROWS; i++){
+            for(int j = 0; j < Layout.COLS; j++){
+                this.grid[i][j] = new Semaphore(1);
+            }
+        }
+    //this.grid[3][0] = new Semaphore(0);
+    }
+
+
+    public void enter(Pos p) throws InterruptedException {
+        this.grid[p.row][p.col].P();
+    }
+
+    public void leave(Pos p){
+        this.grid[p.row][p.col].V();
+    }
+
+
+}
+
 class Gate {
 
     Semaphore g = new Semaphore(0);
@@ -40,6 +67,7 @@ class Car extends Thread {
     int basespeed = 100;             // Rather: degree of slowness
     int variation =  50;             // Percentage of base speed
 
+
     CarDisplayI cd;                  // GUI part
 
     int no;                          // Car number
@@ -52,15 +80,15 @@ class Car extends Thread {
     int speed;                       // Current car speed
     Pos curpos;                      // Current position 
     Pos newpos;                      // New position to go to
+    Grid grid;
 
-    public Car(int no, CarDisplayI cd, Gate g) {
-
+    public Car(int no, CarDisplayI cd, Gate g, Grid grid) {
+        this.grid = grid;
         this.no = no;
         this.cd = cd;
         mygate = g;
         startpos = cd.getStartPos(no);
         barpos = cd.getBarrierPos(no);  // For later use
-
         col = chooseColor();
 
         // do not change the special settings for car no. 0
@@ -112,7 +140,9 @@ class Car extends Thread {
     }
 
    public void run() {
-        try {
+
+
+       try {
 
             speed = chooseSpeed();
             curpos = startpos;
@@ -128,12 +158,17 @@ class Car extends Thread {
                 	
                 newpos = nextPos(curpos);
                 
-                //  Move to new position 
+                //  Move to new position
+                grid.enter(newpos);
+
                 cd.clear(curpos);
-                cd.mark(curpos,newpos,col,no);
+                cd.mark(curpos, newpos, col, no);
                 sleep(speed());
-                cd.clear(curpos,newpos);
-                cd.mark(newpos,col,no);
+                cd.clear(curpos, newpos);
+                cd.mark(newpos, col, no);
+
+
+                grid.leave(curpos);
 
                 curpos = newpos;
             }
@@ -149,22 +184,23 @@ class Car extends Thread {
 
 public class CarControl implements CarControlI{
 
-    // Git test hi martin
     CarDisplayI cd;           // Reference to GUI
     Car[]  car;               // Cars
     Gate[] gate;              // Gates
+    Grid grid;
 
     public CarControl(CarDisplayI cd) {
         this.cd = cd;
         car  = new  Car[9];
         gate = new Gate[9];
-
+        this.grid = new Grid();
         for (int no = 0; no < 9; no++) {
             gate[no] = new Gate();
-            car[no] = new Car(no,cd,gate[no]);
+            car[no] = new Car(no,cd,gate[no], grid);
             car[no].start();
-        } 
+        }
     }
+
 
    public void startCar(int no) {
         gate[no].open();
