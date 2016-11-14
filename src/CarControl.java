@@ -149,6 +149,7 @@ class Car extends Thread {
 
 public class CarControl implements CarControlI{
 
+    // Git test hi martin
     CarDisplayI cd;           // Reference to GUI
     Car[]  car;               // Cars
     Gate[] gate;              // Gates
