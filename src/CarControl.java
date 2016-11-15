@@ -78,29 +78,18 @@ class Alley{
     
 	public void enter(int no) throws InterruptedException {
 		
-		try { e.P(); } catch (InterruptedException e) {
-			
-		}
+		try { e.P(); } catch (InterruptedException e) {}
 		/* deadlock somewhere in this check. it is too slow. use some fancy technique from book to fix */
-		if(no == 1 || no == 2 || no == 3 || no == 4){
-			
-			this.alley[5].P();
-			this.alley[6].P();
-			this.alley[7].P();
-			this.alley[8].P();
-			this.alley[5].V();
-			this.alley[6].V();
-			this.alley[7].V();
-			this.alley[8].V();
+		if(no < 5){
+			for(int i = 5; i < 9; i++){
+				this.alley[i].P();
+				this.alley[i].V();
+			}
 		} else {
-			this.alley[1].P();
-			this.alley[2].P();
-			this.alley[3].P();
-			this.alley[4].P();
-			this.alley[1].V();
-			this.alley[2].V();
-			this.alley[3].V();
-			this.alley[4].V();
+			for(int i = 1; i < 5; i++){
+				this.alley[i].P();
+				this.alley[i].V();
+			}
 		}
 		this.alley[no].P();
 		e.V();
