@@ -66,7 +66,7 @@ class Alley{
 	Semaphore[] alley;
 	//Semaphore g = new Semaphore(1);
     //Semaphore e = new Semaphore(1);
-    
+	Semaphore e = new Semaphore(1);
 
     public Alley(){
         this.alley = new Semaphore[9];
@@ -77,7 +77,10 @@ class Alley{
     }
     
 	public void enter(int no) throws InterruptedException {
-		System.out.println(no);
+		
+		try { e.P(); } catch (InterruptedException e) {
+			
+		}
 		/* deadlock somewhere in this check. it is too slow. use some fancy technique from book to fix */
 		if(no == 1 || no == 2 || no == 3 || no == 4){
 			
@@ -100,8 +103,7 @@ class Alley{
 			this.alley[4].V();
 		}
 		this.alley[no].P();
-		
-		System.out.println();
+		e.V();
 	}
 		
 	public void leave(int no) throws InterruptedException{
@@ -207,7 +209,7 @@ class Car extends Thread {
                     speed = chooseSpeed();
                 }
                 	
-                if(curpos.equals(new Pos(2,1)) || curpos.equals(new Pos(1,4)) || curpos.equals(new Pos(10,0))){
+                if(curpos.equals(new Pos(2,1)) || curpos.equals(new Pos(1,3)) || curpos.equals(new Pos(10,0))){
                 	alley.enter(no);
                 	
                 }
