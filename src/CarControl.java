@@ -64,9 +64,6 @@ class Gate {
 
 class Alley{
 	Semaphore[] alley;
-	//Semaphore g = new Semaphore(1);
-    //Semaphore e = new Semaphore(1);
-	Semaphore e = new Semaphore(1);
 
     public Alley(){
         this.alley = new Semaphore[9];
@@ -77,28 +74,26 @@ class Alley{
     }
     
 	public void enter(int no) throws InterruptedException {
-		
-		try { e.P(); } catch (InterruptedException e) {}
-		/* deadlock somewhere in this check. it is too slow. use some fancy technique from book to fix */
 		if(no < 5){
 			for(int i = 5; i < 9; i++){
-				this.alley[i].P();
-				this.alley[i].V();
+				for(int j = 5; j < 9; j++){
+					this.alley[j].P();
+					this.alley[j].V();
+				}
 			}
 		} else {
 			for(int i = 1; i < 5; i++){
-				this.alley[i].P();
-				this.alley[i].V();
+				for(int j = 1; j < 5; j++){
+					this.alley[j].P();
+					this.alley[j].V();
+				}
 			}
 		}
 		this.alley[no].P();
-		e.V();
 	}
 		
 	public void leave(int no) throws InterruptedException{
 		this.alley[no].V();
-		
-		//System.out.println("no " + no + " : " + this.alley[1].toString() + " " + this.alley[5].toString());
 	}
 }
 
