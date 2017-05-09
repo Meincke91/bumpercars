@@ -7,7 +7,6 @@
 
 import java.awt.Color;
 
-
 class Grid {
     Semaphore[][] grid;
 
@@ -19,9 +18,7 @@ class Grid {
                 this.grid[i][j] = new Semaphore(1);
             }
         }
-    //this.grid[3][0] = new Semaphore(0);
     }
-
 
     public void enter(Pos p) throws InterruptedException {
         this.grid[p.row][p.col].P();
@@ -30,7 +27,6 @@ class Grid {
     public void leave(Pos p){
         this.grid[p.row][p.col].V();
     }
-
 
 }
 
@@ -64,7 +60,7 @@ class Gate {
 
 class Car extends Thread {
 
-    int basespeed = 100;             // Rather: degree of slowness
+    int basespeed = 1;             // Rather: degree of slowness
     int variation =  50;             // Percentage of base speed
 
 
@@ -76,16 +72,19 @@ class Car extends Thread {
     Color col;                       // Car  color
     Gate mygate;                     // Gate at startposition
 
+    Alley alley;
+
 
     int speed;                       // Current car speed
     Pos curpos;                      // Current position 
     Pos newpos;                      // New position to go to
     Grid grid;
 
-    public Car(int no, CarDisplayI cd, Gate g, Grid grid) {
+    public Car(int no, CarDisplayI cd, Gate g, Grid grid, Alley alley) {
         this.grid = grid;
         this.no = no;
         this.cd = cd;
+        this.alley = alley;
         mygate = g;
         startpos = cd.getStartPos(no);
         barpos = cd.getBarrierPos(no);  // For later use
@@ -148,14 +147,23 @@ class Car extends Thread {
             curpos = startpos;
             cd.mark(curpos,col,no);
 
-            while (true) { 
+            while (true) {
                 sleep(speed());
   
                 if (atGate(curpos)) { 
                     mygate.pass(); 
                     speed = chooseSpeed();
                 }
-                	
+
+                if(curpos.equals(new Pos(2,1)) || curpos.equals(new Pos(1,3)) || curpos.equals(new Pos(10,0))){
+                    alley.enter(no);
+
+                }
+                if(curpos.equals(new Pos(9,1)) || curpos.equals(new Pos(0,2))){
+                    alley.leave(no);
+                }
+
+
                 newpos = nextPos(curpos);
                 
                 //  Move to new position
@@ -184,9 +192,10 @@ class Car extends Thread {
 
 public class CarControl implements CarControlI{
 
-    CarDisplayI cd;           // Reference to GUI
-    Car[]  car;               // Cars
-    Gate[] gate;              // Gates
+    CarDisplayI cd;             // Reference to GUI
+    Car[]  car;                 // Cars
+    Gate[] gate;                // Gates
+    Alley alley;                // alley
     Grid grid;
 
     public CarControl(CarDisplayI cd) {
@@ -194,9 +203,10 @@ public class CarControl implements CarControlI{
         car  = new  Car[9];
         gate = new Gate[9];
         this.grid = new Grid();
+        this.alley = new Alley();
         for (int no = 0; no < 9; no++) {
             gate[no] = new Gate();
-            car[no] = new Car(no,cd,gate[no], grid);
+            car[no] = new Car(no,cd,gate[no], grid, alley);
             car[no].start();
         }
     }
