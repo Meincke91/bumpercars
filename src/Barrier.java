@@ -25,27 +25,18 @@ public class Barrier {
 
     // Wait for others to arrive (if barrier active)
     public void sync() {
-        if (barrierActivated) {
+        if (barrierActivated != null && barrierActivated) {
 
             try {rw.P();} catch (InterruptedException e) {System.err.println(e); }
             count++;
             if (count >= threshold) {
-                System.out.println("\ncount: " + count);
-                for (int i = 0; i <= threshold; i++) {
-                    System.out.println("check barrier[" + i + "] = " + barrierArray[i].toString());
-                }
                 for (int i = 0; i <= threshold; i++) {
                     //open barrier
                     barrierArray[i].V();
-
                 }
                 count = 0;
                 rw.V();
             } else {
-                System.out.println("\ncount: " + count);
-                for (int i = 0; i <= threshold; i++) {
-                    System.out.println("check barrier[" + i + "] = " + barrierArray[i].toString());
-                }
                 try {
                     rw.V();
                     barrierArray[count - 1].P();
@@ -59,22 +50,16 @@ public class Barrier {
 
     // Activate barrier
     public void on()  {
-        try {rw.P();} catch (InterruptedException e) {System.err.println(e); }
 
-        System.out.println("\ncount: " + count);
-        for (int i = 0; i <= threshold; i++) {
-            System.out.println("check barrier[" + i + "] = " + barrierArray[i].toString());
-        }
+        try {rw.P();} catch (InterruptedException e) {System.err.println(e); }
 
         if(barrierActivated == null){
             for(int i = 0; i <= threshold; i++){
                 try {
                     barrierArray[i].P();
                 } catch (InterruptedException e) { System.err.println(e); }
-                System.out.println("turn on barrier[" +i+"] = " + barrierArray[i].toString() );
             }
         }
-
 
         barrierActivated = true;
         rw.V();
@@ -83,11 +68,6 @@ public class Barrier {
     // Deactivate barrier
     public void off() {
         try {rw.P();} catch (InterruptedException e) {System.err.println(e); }
-
-        System.out.println("\ncount: " + count);
-        for (int i = 0; i <= threshold; i++) {
-            System.out.println("check barrier[" + i + "] = " + barrierArray[i].toString());
-        }
 
         for(int i = 0; i < count; i++){
             barrierArray[i].V();
