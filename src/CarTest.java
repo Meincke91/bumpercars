@@ -29,19 +29,23 @@ public class CarTest extends Thread {
                 // Demonstration basic use of barrier.
                 // Should let the cars go one round (unless very fast)
                 cars.barrierOn();
-                cars.startAll();
-                sleep(2000);
+                for (int i = 0; i < 8; i++) {
+                    cars.startCar(i);
+                };
+                sleep(1000);
+                cars.startCar(8);
+                sleep(1000);
                 cars.barrierOff();
                 cars.stopAll();
                 break;
             case 2:
                 // Demonstration barrier turned off while cars waiting
                 // Should let the cars go one round (unless very fast)
-                cars.startAll();
-                cars.startCar(0);
-                sleep(1000);
                 cars.barrierOn();
-                sleep(3000);
+                for (int i = 0; i < 8; i++) {
+                    cars.startCar(i);
+                };
+                sleep(1000);
                 cars.barrierOff();
                 cars.stopAll();
                 break;
@@ -59,10 +63,12 @@ public class CarTest extends Thread {
                 for (int i = 1; i < 9; i++) {
                     cars.setSpeed(i,10);
                 }
-                cars.startAll();
-                cars.startCar(0);
-                sleep(1000);
                 cars.barrierOn();
+                cars.startAll();
+
+
+                sleep(1000);
+                cars.startCar(0);
                 sleep(3000);
                 cars.barrierOff();
                 cars.stopAll();
@@ -72,15 +78,15 @@ public class CarTest extends Thread {
                 for (int i = 1; i < 9; i++) {
                     cars.setSpeed(i,30);
                 }
-                cars.startAll();
-                cars.startCar(0);
-
-
                 cars.barrierOn();
-                sleep(1500);
+                for (int i = 0; i < 8; i++) {
+                    cars.startCar(i);
+                };
+                sleep(500);
                 cars.barrierOff();
                 cars.barrierOn();
-                sleep(1000);
+                cars.startCar(8);
+                sleep(5000);
                 cars.barrierOff();
                 cars.stopAll();
                 break;
